@@ -1,4 +1,4 @@
-;; Dont show the GNU splash screen
+; Dont show the GNU splash screen
 (setq message-log-max t)
 (setq inhibit-startup-message t)
 (display-time)
@@ -146,6 +146,7 @@
         (t "e:/apps/Dropbox"))
   "Path to DropBox ON THIS MACHINE")
 
+(setq dropbox-emacs-path (concat dropbox-path "/Emacs/"))
 (setq dropbox-site-lisp (concat dropbox-path "/Emacs/site-lisp/"))
 (add-to-list 'load-path dropbox-site-lisp)
 ;; 2012.11.14 taking out as it loads before nxml mode for xml. and I hate that.
@@ -353,21 +354,8 @@ Common for file-names, etc."
                          ))
 (package-initialize)
 
-;; org-mode
-;; initialize package prior to org
-;;The following lines are always needed. Choose your own keys.
-(add-to-list 'auto-mode-alist' ("\\.org\\'" . org-mode))
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
-
-;;; per http://orgmode.org/manual/Closing-items.html
-(setq org-log-done 'time)
-(setq org-log-done 'note)
-
-(add-hook 'org-mode-hook 'turn-on-font-lock) ;org-mode buffers only
-
-(setq org-agenda-files (list (concat dropbox-path "/Emacs/org/")))
+;; load org-mode init-file
+(load (concat dropbox-emacs-path "org-init.el"))
 
 ;; http://www.emacswiki.org/cgi-bin/wiki/DiredPlus
 (load "dired+") ;; stored in ~/emacs/lisp
@@ -1459,67 +1447,67 @@ by using nxml's indentation rules."
 ;;; keybindings (unless part of a large grouping)
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define-key global-map [?\C-'] 'other-window) ;;http://www.emacswiki.org/cgi-bin/wiki/EmacsNiftyTricks near bottom
-(define-key global-map [?\C-\"] 'back-window) ;; can't find a way to bind w/ arguement
-(global-set-key [?\M-\"] 'swap-windows)
+(define-key global-map [?\C-']     'other-window) ;;http://www.emacswiki.org/cgi-bin/wiki/EmacsNiftyTricks near bottom
+(define-key global-map [?\C-\"]    'back-window) ;; can't find a way to bind w/ arguement
+(global-set-key [?\M-\"]           'swap-windows)
 
 ;; note binding tips at http://tiny-tools.sourceforge.net/emacs-keys-body.html#case_study_why_cant_i
-(define-key global-map "\M-#" 'kill-start-of-line)
-(define-key global-map "\C-xw" 'fixup-whitespace)
-(define-key global-map "\C-x\C-g" 'repos)
-(define-key global-map "\C-x _" 'force-underscore)
+(define-key global-map "\M-#"      'kill-start-of-line)
+(define-key global-map "\C-xw"     'fixup-whitespace)
+(define-key global-map "\C-x\C-g"  'repos) ;; reposition (ie - goto-line)
+(define-key global-map "\C-x _"    'force-underscore)
 
-(define-key global-map "\C-xnt" 'today) ;; from journal.el
+(define-key global-map "\C-xnt"    'today) ;; from journal.el
 
-;; [f1] 'jao-toggle-selective-display (defined below)
-(define-key global-map [f1] 'delete-other-windows)
-(define-key global-map [f2] 'selective-display-column)
-(define-key global-map [M-f2] 'jao-toggle-selective-display)
-(define-key global-map [f3] 'save-buffer) ;; http://slashdot.org/comments.pl?sid=162694&cid=13599510
-(define-key global-map [f4] 'kill-buffer)
+;; [f1]                            'jao-toggle-selective-display (defined below)
+(define-key global-map [f1]        'delete-other-windows)
+(define-key global-map [f2]        'selective-display-column)
+(define-key global-map [M-f2]      'jao-toggle-selective-display)
+(define-key global-map [f3]        'save-buffer) ;; http://slashdot.org/comments.pl?sid=162694&cid=13599510
+(define-key global-map [f4]        'kill-buffer)
 
-(define-key global-map [f5] 'toggle-truncate-lines)
-(define-key global-map [f6] 'other-window)
-(define-key global-map [f7] 'find-in-open)
-(global-set-key (kbd "<f8> t") 'planner-create-task-from-buffer)
+(define-key global-map [f5]        'toggle-truncate-lines)
+(define-key global-map [f6]        'other-window)
+(define-key global-map [f7]        'find-in-open)
+(global-set-key (kbd "<f8> t")     'planner-create-task-from-buffer)
 
-(define-key global-map [f10] 'switch-to-previous-buffer)
-(define-key global-map [f11] 'ibuffer) ;; 'h' after entering for help
-(define-key global-map [f12] 'browse-url-at-point)
-(global-set-key [(meta f12)] 'recentf-open-files)
+(define-key global-map [f10]       'switch-to-previous-buffer)
+(define-key global-map [f11]       'ibuffer) ;; 'h' after entering for help
+(define-key global-map [f12]       'browse-url-at-point)
+(global-set-key [(meta f12)]       'recentf-open-files)
 
-(global-set-key (kbd "C-7") 'comment-or-uncomment-current-line-or-region)
+(global-set-key (kbd "C-7")        'comment-or-uncomment-current-line-or-region)
 
-(global-set-key [S-mouse-3] 'imenu) ;;  (info "(Emacs)Imenu")
+(global-set-key [S-mouse-3]        'imenu) ;;  (info "(Emacs)Imenu")
 
-(define-key global-map "\C-xt" 'tell-me-the-name) ;; old binding C-xnb is used by org-mode
+(define-key global-map "\C-xt"     'tell-me-the-name) ;; old binding C-xnb is used by org-mode
 
-(global-set-key (kbd "M-/") 'hippie-expand)  ;; http://trey-jackson.blogspot.com/2007/12/emacs-tip-5-hippie-expand.html
-(global-set-key "\C-xy" 'push-line)
+(global-set-key (kbd "M-/")        'hippie-expand)  ;; http://trey-jackson.blogspot.com/2007/12/emacs-tip-5-hippie-expand.html
+(global-set-key "\C-xy"            'push-line)
 
-(global-set-key [C-right] 'geosoft-forward-word)
-(global-set-key [C-left] 'geosoft-backward-word)
+(global-set-key [C-right]          'geosoft-forward-word)
+(global-set-key [C-left]           'geosoft-backward-word)
 
-(global-set-key (kbd "M-+") 'text-scale-adjust)
-(global-set-key (kbd "M--") 'text-scale-adjust) ;; OVER-RIDES previous 'negative-argument (also on C-M--, M--)
-(global-set-key (kbd "M-0") 'text-scale-adjust)
+(global-set-key (kbd "M-+")        'text-scale-adjust)
+(global-set-key (kbd "M--")        'text-scale-adjust) ;; OVER-RIDES previous 'negative-argument (also on C-M--, M--)
+(global-set-key (kbd "M-0")        'text-scale-adjust)
 
 
-(global-set-key (kbd "M-|") 'xsteve-exchange-slash-and-backslash)
+(global-set-key (kbd "M-|")        'xsteve-exchange-slash-and-backslash)
 
 ;; C-c q toggles auto-fill, also known as word wrap
-(global-set-key (kbd "C-c q") 'auto-fill-mode)
+(global-set-key (kbd "C-c q")      'auto-fill-mode)
 
-(define-key global-map "\C-xj" 'journal)
-(define-key global-map "\C-xg" '(lambda () (interactive) (journal "/grad-school/journal/")))
+(define-key global-map "\C-xj"     'journal)
+(define-key global-map "\C-xg"     '(lambda () (interactive) (journal "/grad-school/journal/")))
 
 (global-set-key (kbd "M-<return>") 'lisp-complete-symbol)
-(global-set-key (kbd "M-s") 'ido-goto-symbol) ;; completion list
-(global-set-key (kbd "M-S") 'imenu) ;; defaults to current symbol
+(global-set-key (kbd "M-s")        'ido-goto-symbol) ;; completion list
+(global-set-key (kbd "M-S")        'imenu) ;; defaults to current symbol
 
-(global-set-key (kbd "C-M-|") 'indent-rigidly) ;; add to exisitng indentation
+(global-set-key (kbd "C-M-|")      'indent-rigidly) ;; add to exisitng indentation
 
-(global-set-key (kbd "C-c r") 'comment-region)
+(global-set-key (kbd "C-c r")      'comment-region)
 
 ;; simple aliases (too short, but will do for now)
 (defalias 'qrr 'query-replace-regexp)
