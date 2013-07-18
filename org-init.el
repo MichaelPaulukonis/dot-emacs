@@ -73,3 +73,21 @@ else as defined below.
         ;; (unless (= (current-column) 2)
         ;;   (insert "\n\n  "))
 ))
+
+
+;; region handling is a bit awkward
+;; and doesn't look "lispy"
+;; but it works
+;; also brackets code with extra line-break at top and bottom
+(defun org-insert-block (&optional lang)
+  (interactive (list (if current-prefix-arg
+                         (read-from-minibuffer "language: ")
+                       "")))
+  (if (region-active-p)
+      (kill-region (region-beginning) (region-end)))
+  (insert (format "#+begin_src %s\n\n" lang))
+  (if (region-active-p)
+      (yank))
+  (insert "\n\n#+end_src")
+  (goto-char (- (point) 10) ;; magic-number = 1-char before "#+end_src"
+  ))
