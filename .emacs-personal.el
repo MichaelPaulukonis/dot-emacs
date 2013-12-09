@@ -11,7 +11,6 @@
 (setq dired-recursive-copies t)
 (setq visible-bell 1) ;; stop that infernal bell!
 
-
 ;; http://stackoverflow.com/questions/2091881/emacs-font-sizing-with-ctrl-key-and-mouse-scroll
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
@@ -251,7 +250,7 @@
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
 
-(load "skipscreen-functions")
+;;(load "skipscreen-functions")
 
 
 (load "extraedit.el")
@@ -296,6 +295,9 @@ Common for file-names, etc."
   (find-file (concat dropbox-site-lisp "journal.el"))
 )
 
+;;; 2013.11 NOTE: using org-journaling instead of the below.
+;;; left in for legacy reasons
+
 ;; TODO: create buffer-local variables,
 ;; so that each file can belong to a different root-set
 ;; of journals -- project oriented, f'r instance
@@ -310,6 +312,7 @@ Common for file-names, etc."
 (define-key global-map "\C-xj" '(lambda () (interactive) (journal "~/Personal/Journal/")))
 (define-key global-map "\C-xg" '(lambda () (interactive) (journal (concat dropbox-path "/grad-school/journal/"))))
 
+;; wowo. totally forgot this existed. 2013.11
 (defun job-journal ()
   "Open a job-hunt journal entry"
   (interactive)
@@ -321,34 +324,12 @@ Common for file-names, etc."
 ;;; (load "dit-functions")
 
 
-;;;;  execute to initialize elpa on a new install
-;;;; TODO: I suppose it is possible to have this auto-execute if it finds it is not installed....
- ;; (let ((buffer (url-retrieve-synchronously
- ;;               "http://tromey.com/elpa/package-install.el")))
- ;;  (save-excursion
- ;;    (set-buffer buffer)
- ;;    (goto-char (point-min))
- ;;    (re-search-forward "^$" nil 'move)
- ;;    (eval-region (point) (point-max))
- ;;    (kill-buffer (current-buffer))))
-
-;;; This was installed by package-install.el.
-;;; This provides support for the package system and
-;;; interfacing with ELPA, the package archive.
-;;; Move this code earlier if you want to reference
-;;; packages in your .emacs.
-;;;(when
-;;;    (load
-;;;     (expand-file-name "~/.emacs.d/elpa/package.el"))
-;;;  (package-initialize))
-
 ;; this does not work with Emacs 23
 ;; TODO: upgrade to emacs 24 ... AND MAKE SOME DAMN NOTES ABOUT IT
 (require 'package)
-;; (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
 (setq package-archives '(("org" . "http://orgmode.org/elpa/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
-                         ;; errors for marmalade on 2013.05.16
                          ("marmalade" . "http://marmalade-repo.org/packages/")
                          ("melpa" . "http://melpa.milkbox.net/packages/")
                          ))
@@ -739,18 +720,31 @@ Common for file-names, etc."
 
 
 ;;; e-text reader
-(autoload 'etxt "etext")
+;; (autoload 'etxt "etext")
 
 
 ;;; this presumes that the correct path is already in the environment-variable PATH
-(setq-default ispell-program-name "aspell.exe")
-(setq text-mode-hook '(lambda()
-			(flyspell-mode t)       ; spellchek (sic) on the fly
-			))
+;; (setq-default ispell-program-name "aspell.exe")
+;; (setq text-mode-hook '(lambda()
+;; 			(flyspell-mode t)       ; spellchek (sic) on the fly
+;; 			))
 
 ;;; PROGRAMMING MODES
 
 ;; TODO: some perl things, above
+
+;;; http://jblevins.org/projects/markdown-mode/
+
+(autoload 'markdown-mode "markdown-mode"
+   "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+;;; https://npmjs.org/package/markdown-preview
+(setq markdown-command "markdown-preview")
+(setq markdown-command-needs-filename t)
+
 
 (autoload 'asp-mode "asp-mode")
 (setq auto-mode-alist
@@ -1017,7 +1011,7 @@ by using nxml's indentation rules."
 
 ;; Steve Yegge's JS2 mode
 ;; http://code.google.com/p/js2-mode
-(autoload 'js2-mode "js2-mode" nil t)
+;; (autoload 'js2-mode "js2-mode" nil t)
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
 
 (autoload 'js2-highlight-vars "js2-highlight-vars")
@@ -1315,13 +1309,22 @@ by using nxml's indentation rules."
 ;; http://www.emacswiki.org/emacs/IbufferMode#toc5
 (setq ibuffer-saved-filter-groups
       (quote (("default"
+               ("org-personal" (filename . "personal\.org$"))
+               ("org-freelance" (filename . "freelance\.org$"))
+               ("org-work" (filename . "work\.org$"))
+               ("org" (filename . "org"))
+               ("trello" (name . "trello"))
+               ("bootstrap" (filename . "bootstrap"))
+               ("michaelpaulukonis.com" (or
+                                         (name . "michaelpaulukonis\.com")
+                                         (filename . "michaelpaulukonis\.com")))
                ("webtext" (filename . "/WebText/"))
                ("javascript" (or
                         (mode . javascript-mode)
                         (filename . "/greasemonkey/")
                         (filename . "/javascript/")
                         (name . "greasemonkey-fns.el")))
-              ("xrad" (or
+               ("xrad" (or
                         (name . ".*xradiograph\\.com.*")
                         (name . "XraysMonaLisa")
                         (filename . "c:/www/xradiograph/")))
@@ -1335,7 +1338,6 @@ by using nxml's indentation rules."
                ("planner" (or
                            (name . "^\\*Calendar\\*$")
                            (name . "diary")))
-               ("w3m"  (name . ".*w3m.*"))
                ("emacs" (or
                          (mode . help-mode)
                          (mode . occur-mode)
@@ -1349,15 +1351,7 @@ by using nxml's indentation rules."
                          (name . "^\\*Messages\\*$")
                          (filename . "/site-lisp/")))
                ("dired" (mode . dired-mode))
-               ("gnus" (or
-                        (mode . message-mode)
-                        (mode . bbdb-mode)
-                        (mode . mail-mode)
-                        (mode . gnus-group-mode)
-                        (mode . gnus-summary-mode)
-                        (mode . gnus-article-mode)
-                        (name . "^\\.bbdb$")
-                        (name . "^\\.newsrc-dribble")))))))
+               ))))
 
 ;; ibuffer, I like my buffers to be grouped
 (add-hook 'ibuffer-mode-hook
@@ -1450,6 +1444,7 @@ by using nxml's indentation rules."
 (define-key global-map [?\C-']     'other-window) ;;http://www.emacswiki.org/cgi-bin/wiki/EmacsNiftyTricks near bottom
 (define-key global-map [?\C-\"]    'back-window) ;; can't find a way to bind w/ arguement
 (global-set-key [?\M-\"]           'swap-windows)
+;;;(global-set-key [C-x C-j]          'dired-jump) ;; something has made C-x C-j into a prefix .....
 
 ;; note binding tips at http://tiny-tools.sourceforge.net/emacs-keys-body.html#case_study_why_cant_i
 (define-key global-map "\M-#"      'kill-start-of-line)
@@ -1457,6 +1452,7 @@ by using nxml's indentation rules."
 (define-key global-map "\C-x\C-g"  'repos) ;; reposition (ie - goto-line)
 (define-key global-map "\C-x _"    'force-underscore)
 
+;;; TODO this will be refactored, as journal.el depence will be removed....
 (define-key global-map "\C-xnt"    'today) ;; from journal.el
 
 ;; [f1]                            'jao-toggle-selective-display (defined below)
@@ -1467,7 +1463,7 @@ by using nxml's indentation rules."
 (define-key global-map [f4]        'kill-buffer)
 
 (define-key global-map [f5]        'toggle-truncate-lines)
-(define-key global-map [f6]        'other-window)
+(global-set-key (kbd "<C-f5>")     '(lambda () (interactive) (revert-buffer t t)))
 (define-key global-map [f7]        'find-in-open)
 (global-set-key (kbd "<f8> t")     'planner-create-task-from-buffer)
 
@@ -1493,13 +1489,13 @@ by using nxml's indentation rules."
 (global-set-key (kbd "M-0")        'text-scale-adjust)
 
 
+(global-set-key (kbd "C-x M-o")     'other-frame)
 (global-set-key (kbd "M-|")        'xsteve-exchange-slash-and-backslash)
 
 ;; C-c q toggles auto-fill, also known as word wrap
 (global-set-key (kbd "C-c q")      'auto-fill-mode)
 
 (define-key global-map "\C-xj"     'journal)
-(define-key global-map "\C-xg"     '(lambda () (interactive) (journal "/grad-school/journal/")))
 
 (global-set-key (kbd "M-<return>") 'lisp-complete-symbol)
 (global-set-key (kbd "M-s")        'ido-goto-symbol) ;; completion list
@@ -1523,9 +1519,10 @@ by using nxml's indentation rules."
 ;; as seen at http://www.emacswiki.org/emacs-en/EmacsNiftyTricks#toc4 (buffers and files)
 ;; C-x r j <+ register letter>
 (set-register ?e (cons 'file (concat dropbox-path "/Emacs/.emacs-personal.el")))
-(set-register ?d (cons 'file (concat dropbox-site-lisp "dit-functions.el")))
+(set-register ?d (cons 'file dropbox-path)) ;;; open dropbox
+;;;(set-register ?d (cons 'file (concat dropbox-site-lisp "dit-functions.el"))) ;; don't need this on a register...
 (set-register ?g (cons 'file (concat dropbox-site-lisp "greasemonkey-fns.el")))
-(set-register ?j (cons 'file (concat dropbox-site-lisp "journal.el")))
+(set-register ?j (cons 'file (concat dropbox-site-lisp "journal.el"))) ;; edit journal. can remove at some point
 (set-register ?x (cons 'file (concat dropbox-site-lisp "xrays-functions.el")))
 (set-register ?w (cons 'file (concat dropbox-path "/projects/WebText/")))
 (set-register ?l (cons 'file (concat dropbox-path "/projects/TextMunger/Library/")))
@@ -1539,15 +1536,15 @@ by using nxml's indentation rules."
 ;; ;;; DISPLAY
 
 ;; window maximized
-;; (when (fboundp 'w32-send-sys-command)
-;;  (w32-send-sys-command #xf030))
+(when (fboundp 'w32-send-sys-command)
+ (w32-send-sys-command #xf030))
 (setq default-frame-alist '((width . 120) (height . 45)))
 
 (setq-default truncate-lines t)
 
 ;; load calendar
 ;; so part of revived-config
-(calendar)
+;;; (calendar)
 
 ;; list bookmarks
 (bookmark-bmenu-list)
@@ -1571,9 +1568,10 @@ by using nxml's indentation rules."
 ;; ;; prefix keys seemed mapped elsewhere if CUA mode set
 ;; ;; see menu at top
 ;; ;; http://www.morishima.net/~naoto/software/elscreen/
-(add-to-list 'load-path (concat dropbox-site-lisp "apel-10.7/"))
-(add-to-list 'load-path (concat dropbox-site-lisp "elscreen-1.4.6/"))
-(load "elscreen" "ElScreen" t)
+;; (add-to-list 'load-path (concat dropbox-site-lisp "apel-10.7/"))
+;; (add-to-list 'load-path (concat dropbox-site-lisp "elscreen-1.4.6/"))
+;; (load "elscreen" "ElScreen" t)
+(elscreen-start)
 
 ;;; http://www.emacswiki.org/emacs/WThreeMTables
 (standard-display-ascii ?\205 "...")
@@ -1600,17 +1598,22 @@ by using nxml's indentation rules."
 
 ;; ;; okay, so let's just go with some simple things
 ;;; use list-colors-display for available colors....
-(set-background-color "black")
-(set-foreground-color "cyan")
-(set-cursor-color "yellow")
-(set-face-foreground 'font-lock-warning-face "DeepPink")
-(set-face-foreground 'font-lock-string-face "DeepPink")
-(set-face-foreground 'font-lock-comment-face "yellow")
-(set-face-background 'highlight "grey8")
-(set-face-background 'region "blue")
+;; (set-background-color "black")
+;; (set-foreground-color "cyan")
+;; (set-cursor-color "yellow")
+;; (set-face-foreground 'font-lock-warning-face "DeepPink")
+;; (set-face-foreground 'font-lock-string-face "DeepPink")
+;; (set-face-foreground 'font-lock-comment-face "yellow")
+;; (set-face-background 'highlight "grey8")
+;; (set-face-background 'region "blue")
 (transient-mark-mode t) ;; otherwise highlighting-region won't show up..
 
-
+;;; https://github.com/n3mo/cyberpunk-theme.el
+;;(add-to-list 'custom-theme-load-path (concat dropbox-site-lisp "themes/cyberpunk-theme.el"))
+;; (load-theme 'cyberpunk t)
+;; manually load, elpa install -- none of the above work. AAAARGH.
+;; however, load-file works. waaaah!
+(load-file (concat dropbox-site-lisp "themes/cyberpunk-theme.el"))
 
 
 ;; Change title bar to ~/file-directory if the current buffer is a
