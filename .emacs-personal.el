@@ -1,4 +1,5 @@
 ; Dont show the GNU splash screen
+(server-start)
 (setq message-log-max t)
 (setq inhibit-startup-message t)
 (display-time)
@@ -734,7 +735,6 @@ Common for file-names, etc."
 ;; TODO: some perl things, above
 
 ;;; http://jblevins.org/projects/markdown-mode/
-
 (autoload 'markdown-mode "markdown-mode"
    "Major mode for editing Markdown files" t)
 (add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
@@ -745,6 +745,19 @@ Common for file-names, etc."
 (setq markdown-command "markdown-preview")
 (setq markdown-command-needs-filename t)
 
+(add-to-list 'exec-path (concat (file-name-as-directory (getenv "APPDATA")) "npm"))
+
+(eval-after-load "markdown-mode"
+  '(progn
+     ;; so then this should work:
+     (defun markdown-preview-buffer ()
+       "open current buffer with markdown-preview (node.js)"
+       (interactive)
+       (start-process "markdown-preview" nil "markdown-preview.cmd" (buffer-file-name)))
+
+     ;; markdown-mode is auto-load, so this isn't available at the time of parsing. doh!
+     ;; (define-key markdown-mode-map (kbd "C-c C-c p") 'markdown-preview-buffer)
+     (global-set-key (kbd "C-c C-c p") 'markdown-preview-buffer)))
 
 (autoload 'asp-mode "asp-mode")
 (setq auto-mode-alist
@@ -1009,6 +1022,11 @@ by using nxml's indentation rules."
 (load "js-funcs")
 (load "greasemonkey-fns")
 
+
+;;; TODO: with the new ELPA-derived js2 mode,
+;;; how much of the below do I need?
+;;; is it interfering with anything?
+
 ;; Steve Yegge's JS2 mode
 ;; http://code.google.com/p/js2-mode
 ;; (autoload 'js2-mode "js2-mode" nil t)
@@ -1079,7 +1097,8 @@ by using nxml's indentation rules."
   (setq espresso-indent-level 4
         indent-tabs-mode nil
         c-basic-offset 8)
-  (c-toggle-auto-state 0)
+  ;; (c-toggle-auto-state 0)
+  (c-toggle-auto-newline 0)
   (c-toggle-hungry-state 1)
   (set (make-local-variable 'indent-line-function) 'my-js2-indent-function)
   (define-key js2-mode-map [(meta control |)] 'cperl-lineup)
@@ -1207,7 +1226,7 @@ by using nxml's indentation rules."
   (imenu--make-index-alist)
   (let ((name-and-pos '())
         (symbol-names '()))
-    (flet ((addsymbols (symbol-list)
+    (cl-flet ((addsymbols (symbol-list)
                        (when (listp symbol-list)
                          (dolist (symbol symbol-list)
                            (let ((name nil) (position nil))
@@ -1480,30 +1499,23 @@ by using nxml's indentation rules."
 
 (global-set-key (kbd "M-/")        'hippie-expand)  ;; http://trey-jackson.blogspot.com/2007/12/emacs-tip-5-hippie-expand.html
 (global-set-key "\C-xy"            'push-line)
-
 (global-set-key [C-right]          'geosoft-forward-word)
 (global-set-key [C-left]           'geosoft-backward-word)
-
 (global-set-key (kbd "M-+")        'text-scale-adjust)
 (global-set-key (kbd "M--")        'text-scale-adjust) ;; OVER-RIDES previous 'negative-argument (also on C-M--, M--)
 (global-set-key (kbd "M-0")        'text-scale-adjust)
-
-
-(global-set-key (kbd "C-x M-o")     'other-frame)
+(global-set-key (kbd "C-x M-o")    'other-frame)
 (global-set-key (kbd "M-|")        'xsteve-exchange-slash-and-backslash)
 
 ;; C-c q toggles auto-fill, also known as word wrap
 (global-set-key (kbd "C-c q")      'auto-fill-mode)
 
-(define-key global-map "\C-xj"     'journal)
-
 (global-set-key (kbd "M-<return>") 'lisp-complete-symbol)
 (global-set-key (kbd "M-s")        'ido-goto-symbol) ;; completion list
 (global-set-key (kbd "M-S")        'imenu) ;; defaults to current symbol
-
 (global-set-key (kbd "C-M-|")      'indent-rigidly) ;; add to exisitng indentation
-
 (global-set-key (kbd "C-c r")      'comment-region)
+
 
 ;; simple aliases (too short, but will do for now)
 (defalias 'qrr 'query-replace-regexp)
@@ -1594,18 +1606,6 @@ by using nxml's indentation rules."
 
 ;; TODO: move to display section
 (global-font-lock-mode 1) ;for all buffers
-
-
-;; ;; okay, so let's just go with some simple things
-;;; use list-colors-display for available colors....
-;; (set-background-color "black")
-;; (set-foreground-color "cyan")
-;; (set-cursor-color "yellow")
-;; (set-face-foreground 'font-lock-warning-face "DeepPink")
-;; (set-face-foreground 'font-lock-string-face "DeepPink")
-;; (set-face-foreground 'font-lock-comment-face "yellow")
-;; (set-face-background 'highlight "grey8")
-;; (set-face-background 'region "blue")
 (transient-mark-mode t) ;; otherwise highlighting-region won't show up..
 
 ;;; https://github.com/n3mo/cyberpunk-theme.el
@@ -1640,7 +1640,12 @@ Assumes you are in dired mode, and you in a directory of keyed (debug) files."
   (interactive)
   (gomoku 15 15))
 
-
+;;; 2013.12.09
+;;; load some of the Emacs32 files I find useful
+;;; NOTE: this location will change
+;;; this path is only correct on my personal machine
+(add-to-list 'load-path (concat (file-name-as-directory dropbox-emacs-path) "EmacsW32/lisp"))
+(require 'emacsw32)
 
 ;; restore all buffers from previous config
 ;; see revive.el
@@ -1650,5 +1655,4 @@ Assumes you are in dired mode, and you in a directory of keyed (debug) files."
 (autoload 'resume "revive" "Resume Emacs" t)
 (autoload 'wipe "revive" "Wipe Emacs" t)
 
-(server-start)
 (resume)
