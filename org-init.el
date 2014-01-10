@@ -49,8 +49,11 @@ else as defined below.
     (let ((sfx (if suffix (concat "." suffix) "")))
     (setq filename (concat todays-date sfx ".org")))
 
-    (list (read-file-name
-	   "Open journal-org file: " default-directory filename nil filename)))
+    ;; why prompt? just open the d***n thing
+    ;; maybe universal-arg will cause a prompt....
+    ;; (list (read-file-name
+    ;;        "Open journal-org file: " default-directory filename nil filename))
+    )
 
   (find-file filename) ;; switch to buffer if exists, or open file
 
@@ -58,13 +61,13 @@ else as defined below.
   (widen)
   ;; heading is not working correctly if it is the result of (today)
   (let ((isearch-forward t) (heading (get-today)))
-        (beginning-of-buffer)
+        (goto-char (point-min))
         (unless (org-goto-local-search-headings heading nil t)
           ((lambda ()
              (org-insert-heading)
              (insert heading)
              (insert "\n\n"))))
-        (end-of-buffer)
+        (goto-char (point-max))
         ;; (org-show-entry)
         (widen)
         ;; (org-narrow-to-subtree)
