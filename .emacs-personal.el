@@ -610,7 +610,10 @@ Common for file-names, etc."
 ;; http://steve.yegge.googlepages.com/my-dot-emacs-file
 ;; someday might want to rotate windows if more than 2 of them
 (defun swap-windows ()
- "If you have 2 windows, it swaps them." (interactive) (cond ((not (= (count-windows) 2)) (message "You need exactly 2 windows to do this."))
+ "If you have 2 windows, it swaps them."
+ (interactive)
+ (require 'cl) ;; supplies 'first' and 'second', below
+ (cond ((not (= (count-windows) 2)) (message "You need exactly 2 windows to do this."))
  (t
  (let* ((w1 (first (window-list)))
          (w2 (second (window-list)))
